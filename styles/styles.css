@@ -1,0 +1,151 @@
+.tooltip {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #333;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 5px;
+    border-radius: 4px;
+    pointer-events: none;
+    position: absolute;
+    opacity: 0;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+ /* Add some basic styling */
+ body {
+    font-family: Arial, sans-serif;
+}
+.search-bar {
+    margin: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+.search-bar input {
+    padding: 10px;
+    font-size: 16px;
+    width: 300px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+.card {
+    border: 1px solid #ccc;
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.gauge-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Creates 2 equal columns */
+    gap: 10px; /* Adds space between the gauges */
+}
+.gauge {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+    background-color: #f9f9f9;}
+
+
+.card .player-info {
+        position: relative;
+        padding: 20px;
+        color: #fff;
+        background-size: cover;
+        background-position: center;
+        border-radius: 10px;
+      }
+      
+.card .player-info::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
+        border-radius: 10px;
+      }
+      
+.card .player-info h2,
+.card .player-info h4,
+.card .player-info p {
+        position: relative;
+        z-index: 1; /* Ensure text is above the background image */
+      }
+      
+
+
+      /* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Navbar Styles */
+nav {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: flex-start;
+}
+
+nav ul li {
+    margin-right: 20px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Search Bar Styles */
+.search-bar {
+    margin: 20px;
+    text-align: center;
+}
+
+.search-bar input {
+    padding: 10px;
+    width: 50%;
+    font-size: 16px;
+}
+
+
+
+/* Heatmap Styles */
+#heatmap-container {
+    margin: 20px;
+}
+
+.filter-sort-options {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+}
+
+.filter-sort-options label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.filter-sort-options select {
+    margin-bottom: 20px;
+    padding: 5px;
+}

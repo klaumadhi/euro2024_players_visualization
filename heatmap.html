@@ -13,10 +13,7 @@
         }
 
         #heatmap {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-            gap: 5px;
-            margin: 80px 50px 20px;
+            display: flex; flex-wrap: wrap; /* Ensure the squares wrap to the next line */ justify-content: flex-start; align-items: center; gap: 10px; /* Adjust gap between squares */ 
         }
 
         .square {
@@ -26,6 +23,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
                 }
 
     .square .initials-circle {
@@ -56,8 +54,11 @@
             background-size: cover;
             background-position: center;
             z-index: -1;
-            opacity: 0.7; /* Reduced opacity */
+            opacity: 1; /* Reduced opacity */
             transition: opacity 0.3s;
+            border-radius: 5px;
+            border: 0.1px solid rgba(0, 0, 0, 0.5);
+            
         }
 
         .square:hover .info-tooltip {

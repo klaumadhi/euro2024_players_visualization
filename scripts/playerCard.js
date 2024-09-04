@@ -32,8 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const cardContainer = document.getElementById("card-container");
 
     // Calculate the maximum values dynamically
-    const maxAge = 40;
-    const maxHeight = 210;
+    const maxAge = d3.max(players, (d) => +d.Age);
+    const maxHeight = d3.max(players, (d) => +d.Height);
     const maxCaps = d3.max(players, (d) => +d.Caps);
     const maxMarketValue = d3.max(players, (d) => +d.MarketValue);
 
@@ -69,8 +69,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // Append card to container
       cardContainer.appendChild(card);
 
-      // Create the Age Gauge
-      createGauge(
+      // Create the Age Gauge (Linear Bar Chart)
+      createLinearBarChart(
         `#${sanitizedName}-age-gauge`,
         player.Age,
         maxAge,
@@ -78,8 +78,8 @@ document.addEventListener("DOMContentLoaded", () => {
         `${player.Age} years old`
       );
 
-      // Create the Height Gauge
-      createGauge(
+      // Create the Height Gauge (Linear Bar Chart)
+      createLinearBarChart(
         `#${sanitizedName}-height-gauge`,
         player.Height,
         maxHeight,
@@ -87,8 +87,8 @@ document.addEventListener("DOMContentLoaded", () => {
         `${player.Height} cm`
       );
 
-      // Create the Caps Gauge
-      createGauge(
+      // Create the Caps Gauge (Linear Bar Chart)
+      createLinearBarChart(
         `#${sanitizedName}-caps-gauge`,
         player.Caps,
         maxCaps,
@@ -96,8 +96,8 @@ document.addEventListener("DOMContentLoaded", () => {
         `${player.Caps} caps`
       );
 
-      // Create the Market Value Gauge
-      createGauge(
+      // Create the Market Value Gauge (Linear Bar Chart)
+      createLinearBarChart(
         `#${sanitizedName}-marketvalue-gauge`,
         player.MarketValue,
         maxMarketValue,
@@ -106,83 +106,86 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     });
 
-    function createGauge(container, value, maxValue, label, displayText) {
-      const width = 100,
-        height = 100,
-        twoPi = 2 * Math.PI;
-      const arc = d3.arc().startAngle(0).innerRadius(40).outerRadius(50);
+    function createLinearBarChart(
+      container,
+      value,
+      maxValue,
+      label,
+      displayText
+    ) {
+      const width = 250, // Bar chart width
+        height = 20, // Bar chart height
+        barHeight = 20; // Height of the filled part of the bar
 
       const svg = d3
         .select(container)
         .append("svg")
         .attr("width", width)
-        .attr("height", height)
-        .append("g")
-        .attr("transform", `translate(${width / 2}, ${height / 2})`);
+        .attr("height", height);
 
-      const background = svg
-        .append("path")
-        .datum({ endAngle: twoPi })
-        .style("fill", "#ddd")
-        .attr("d", arc);
+      // Background bar
+      svg
+        .append("rect")
+        .attr("width", width)
+        .attr("height", barHeight)
+        .attr("y", (height - barHeight) / 2)
+        .attr("fill", "#ddd");
 
-      const foreground = svg
-        .append("path")
-        .datum({ endAngle: 0 })
-        .attr("d", arc);
+      // Filled bar
+      svg
+        .append("rect")
+        .attr("width", (value / maxValue) * width)
+        .attr("height", barHeight)
+        .attr("y", (height - barHeight) / 2)
+        .attr("fill", "#4682B4"); // SteelBlue
 
-      const text = svg
+      // Text displaying the current value
+      svg
         .append("text")
+        .attr("x", width / 2)
+        .attr("y", height / 2)
+        .attr("dy", ".35em")
         .attr("text-anchor", "middle")
-        .attr("dy", "0.35em")
-        .style("font-size", "14px")
         .style("fill", "#333")
+        .style("font-size", "10px")
         .text(displayText);
 
-      const percentComplete = value / maxValue;
+      // Display the minimum and maximum values
+      svg
+        .append("text")
+        .attr("x", 0)
+        .attr("y", height - 5)
+        .attr("text-anchor", "start")
+        .style("fill", "#333")
+        .style("font-size", "10px")
+        .text("Min: 0");
 
-      // Determine color based on percentComplete
-      const color = d3
-        .scaleLinear()
-        .domain([0, 0.5, 1])
-        .range(["#00ff00", "#ffff00", "#ff0000"]); // Green to yellow to red
+      // Format the max value if the label is "Market Value"
+      const formattedMaxValue =
+        label === "Market Value" ? formatMarketValue(maxValue) : maxValue;
 
-      foreground
-        .style("fill", color(percentComplete))
-        .transition()
-        .duration(750)
-        .attrTween("d", function (d) {
-          const interpolate = d3.interpolate(
-            d.endAngle,
-            percentComplete * twoPi
-          );
-          return function (t) {
-            d.endAngle = interpolate(t);
-            return arc(d);
-          };
-        });
+      svg
+        .append("text")
+        .attr("x", width)
+        .attr("y", height - 5)
+        .attr("text-anchor", "end")
+        .style("fill", "#333")
+        .style("font-size", "10px")
+        .text(`Max: ${formattedMaxValue}`);
     }
 
     // Implement search functionality
     const searchInput = document.getElementById("search-input");
     searchInput.addEventListener("input", function () {
-      console.log("Search event triggered");
-
       const filter = searchInput.value.toLowerCase().trim();
-
-      console.log("Filter:", filter);
-
       const cards = document.querySelectorAll(".card");
 
       cards.forEach((card) => {
         const name = card.querySelector("h2").textContent.toLowerCase().trim();
-        console.log("Card name:", name);
         if (name.includes(filter)) {
           card.style.display = "";
-          console.log(`Match found: ${name}`);
         } else {
           card.style.display = "none";
-          console.log(`No match: ${name}`);
         }
       });
     });

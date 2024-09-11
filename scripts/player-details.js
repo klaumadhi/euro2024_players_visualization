@@ -27,22 +27,39 @@ const flags = {
 };
 
 document.addEventListener("DOMContentLoaded", function () {
-  const urlParams = new URLSearchParams(window.location.search);
   const playerDetails = JSON.parse(localStorage.getItem("selectedPlayer"));
 
+  // Display player details if found
   if (playerDetails) {
     document.getElementById("player-name").textContent = playerDetails.Name;
     document.getElementById("player-flag").src = flags[playerDetails.Country];
     document.getElementById("player-info").innerHTML = `
-            <div class="info"><strong>Position:</strong> ${playerDetails.Position}</div>
-            <div class="info"><strong>Age:</strong> ${playerDetails.Age}</div>
-            <div class="info"><strong>Club:</strong> ${playerDetails.Club}</div>
-            <div class="info"><strong>Height:</strong> ${playerDetails.Height} cm</div>
-            <div class="info"><strong>Foot:</strong> ${playerDetails.Foot}</div>
-            <div class="info"><strong>Caps:</strong> ${playerDetails.Caps}</div>
-            <div class="info"><strong>Goals:</strong> ${playerDetails.Goals}</div>
-            <div class="info"><strong>Market Value:</strong> €${playerDetails.MarketValue}</div>
-            <div class="info"><strong>Country:</strong> ${playerDetails.Country}</div>
-        `;
+      <div class="info"><strong>Position:</strong> ${
+        playerDetails.Position
+      }</div>
+      <div class="info"><strong>Age:</strong> ${playerDetails.Age}</div>
+      <div class="info"><strong>Club:</strong> ${playerDetails.Club}</div>
+      <div class="info"><strong>Height:</strong> ${
+        playerDetails.Height
+      } cm</div>
+      <div class="info"><strong>Foot:</strong> ${playerDetails.Foot}</div>
+      <div class="info"><strong>Caps:</strong> ${playerDetails.Caps}</div>
+      <div class="info"><strong>Goals:</strong> ${playerDetails.Goals}</div>
+      <div class="info"><strong>Market Value:</strong> ${formatMarketValue(
+        playerDetails.MarketValue
+      )}</div>
+      <div class="info"><strong>Country:</strong> ${playerDetails.Country}</div>
+    `;
   }
 });
+
+// Convert large numbers into formatted strings for readability
+function formatMarketValue(value) {
+  if (value >= 1000000) {
+    return `€${(value / 1000000).toFixed(2).replace(/\.00$/, "")}M`;
+  } else if (value >= 1000) {
+    return `€${(value / 1000).toLocaleString()}K`;
+  } else {
+    return `€${value.toLocaleString()}`;
+  }
+}

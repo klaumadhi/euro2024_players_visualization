@@ -27,49 +27,49 @@ const flags = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Load the CSV file
+  // Load CSV data using D3
   d3.csv("data/euro2024_players.csv").then((players) => {
     const cardContainer = document.getElementById("card-container");
 
-    // Calculate the maximum values dynamically
+    // Get maximum values dynamically for comparison
     const maxAge = d3.max(players, (d) => +d.Age);
     const maxHeight = d3.max(players, (d) => +d.Height);
     const maxCaps = d3.max(players, (d) => +d.Caps);
     const maxMarketValue = d3.max(players, (d) => +d.MarketValue);
 
     players.forEach((player) => {
-      // Sanitize the player name to create a valid ID
+      // Sanitize player name to be a valid ID
       const sanitizedName = player.Name.replace(/\s/g, "").replace(
         /[^a-zA-Z0-9]/g,
         "_"
       );
 
-      // Get the flag URL based on the country
+      // Get the player's flag based on their country
       const flagUrl = flags[player.Country];
 
-      // Create card
+      // Create a card for each player
       const card = document.createElement("div");
       card.className = "card";
 
-      // Add player name, country, and placeholders for gauges
+      // Add player info to the card with flag as a background
       card.innerHTML = `
-            <div class="player-info" style="background-image: url(${flagUrl});">
-                <h2>${player.Name}</h2>
-                <h4>Position: ${player.Position}</h4>
-                <p>${player.Country}</p>
-            </div>
-            <div class="gauge-container">
-                <div class="gauge" id="${sanitizedName}-age-gauge"><p>Age</p></div>
-                <div class="gauge" id="${sanitizedName}-height-gauge"><p>Height</p></div>
-                <div class="gauge" id="${sanitizedName}-caps-gauge"><p>Caps</p></div>
-                <div class="gauge" id="${sanitizedName}-marketvalue-gauge"><p>Market Value</p></div>
-            </div>
-        `;
+        <div class="player-info" style="background-image: url(${flagUrl});">
+          <h2>${player.Name}</h2>
+          <h4>Position: ${player.Position}</h4>
+          <p>${player.Country}</p>
+        </div>
+        <div class="gauge-container">
+          <div class="gauge" id="${sanitizedName}-age-gauge"><p>Age</p></div>
+          <div class="gauge" id="${sanitizedName}-height-gauge"><p>Height</p></div>
+          <div class="gauge" id="${sanitizedName}-caps-gauge"><p>Caps</p></div>
+          <div class="gauge" id="${sanitizedName}-marketvalue-gauge"><p>Market Value</p></div>
+        </div>
+      `;
 
-      // Append card to container
+      // Append the card to the container
       cardContainer.appendChild(card);
 
-      // Create the Age Gauge (Linear Bar Chart)
+      // Create gauges for age, height, caps, and market value
       createLinearBarChart(
         `#${sanitizedName}-age-gauge`,
         player.Age,
@@ -77,8 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "Age",
         `${player.Age} years old`
       );
-
-      // Create the Height Gauge (Linear Bar Chart)
       createLinearBarChart(
         `#${sanitizedName}-height-gauge`,
         player.Height,
@@ -86,8 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "Height",
         `${player.Height} cm`
       );
-
-      // Create the Caps Gauge (Linear Bar Chart)
       createLinearBarChart(
         `#${sanitizedName}-caps-gauge`,
         player.Caps,
@@ -95,8 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "Caps",
         `${player.Caps} caps`
       );
-
-      // Create the Market Value Gauge (Linear Bar Chart)
       createLinearBarChart(
         `#${sanitizedName}-marketvalue-gauge`,
         player.MarketValue,
@@ -106,6 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     });
 
+    // Function to create a linear bar chart for each stat
     function createLinearBarChart(
       container,
       value,
@@ -113,9 +108,9 @@ document.addEventListener("DOMContentLoaded", () => {
       label,
       displayText
     ) {
-      const width = 250, // Bar chart width
-        height = 20, // Bar chart height
-        barHeight = 20; // Height of the filled part of the bar
+      const width = 250, // Set the width of the bar
+        height = 20, // Set the height of the bar
+        barHeight = 20; // Set the height for the filled portion
 
       const svg = d3
         .select(container)
@@ -123,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .attr("width", width)
         .attr("height", height);
 
-      // Background bar
+      // Create background bar
       svg
         .append("rect")
         .attr("width", width)
@@ -131,15 +126,15 @@ document.addEventListener("DOMContentLoaded", () => {
         .attr("y", (height - barHeight) / 2)
         .attr("fill", "#ddd");
 
-      // Filled bar
+      // Create filled bar based on player's value relative to max value
       svg
         .append("rect")
         .attr("width", (value / maxValue) * width)
         .attr("height", barHeight)
         .attr("y", (height - barHeight) / 2)
-        .attr("fill", "#4682B4"); // SteelBlue
+        .attr("fill", "#4682B4"); // SteelBlue color
 
-      // Text displaying the current value
+      // Display the player's value as text in the center
       svg
         .append("text")
         .attr("x", width / 2)
@@ -150,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .style("font-size", "10px")
         .text(displayText);
 
-      // Display the minimum and maximum values
+      // Display minimum value on the left
       svg
         .append("text")
         .attr("x", 0)
@@ -160,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .style("font-size", "10px")
         .text("Min: 0");
 
-      // Format the max value if the label is "Market Value"
+      // Display maximum value on the right
       const formattedMaxValue =
         label === "Market Value" ? formatMarketValue(maxValue) : maxValue;
 
@@ -174,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .text(`Max: ${formattedMaxValue}`);
     }
 
-    // Implement search functionality
+    // Implement search functionality to filter cards
     const searchInput = document.getElementById("search-input");
     searchInput.addEventListener("input", function () {
       const filter = searchInput.value.toLowerCase().trim();
@@ -192,6 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// Format market value to be displayed in a user-friendly way
 function formatMarketValue(value) {
   if (value >= 1000000) {
     return `€${(value / 1000000).toFixed(2).replace(/\.00$/, "")}M`;

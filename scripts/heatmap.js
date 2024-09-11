@@ -1,4 +1,3 @@
-// Country flags
 const flags = {
   Albania: "https://www.worldometers.info/img/flags/al-flag.gif",
   Austria: "https://www.worldometers.info/img/flags/au-flag.gif",
@@ -36,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const positionSelect = d3.select("#position-select");
     const resetButton = d3.select("#reset-button");
 
-    // Extract unique filter options and remove invalid entries
+    // Extract unique filter options
     const countries = Array.from(new Set(data.map((d) => d.Country)))
       .filter(Boolean)
       .sort();
@@ -72,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .attr("class", "square")
         .style("width", (d) => `${sizeScale ? sizeScale(d) : 50}px`)
         .style("height", (d) => `${sizeScale ? sizeScale(d) : 50}px`)
-        .style("margin", "5px") // Add margin to prevent overlap
+        .style("margin", "5px") // Adding margin to prevent overlap
         .attr(
           "data-info",
           (d) => `
@@ -89,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
           `
         )
         .each(function (d) {
-          console.log("Adding tooltip for:", d.Name); // Debug log
+          // Add flag background and initials
           d3.select(this)
             .append("div")
             .attr("class", "bg-image")
@@ -104,6 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 .join("")
             );
 
+          // Display player info on hover
           d3.select(this)
             .append("div")
             .attr("class", "info-tooltip")
@@ -117,11 +117,14 @@ document.addEventListener("DOMContentLoaded", function () {
                       <strong>Foot:</strong> ${d.Foot}<br>
                       <strong>Caps:</strong> ${d.Caps}<br>
                       <strong>Goals:</strong> ${d.Goals}<br>
-                      <strong>Market Value:</strong> €${d.MarketValue}<br>
+                      <strong>Market Value:</strong> ${formatMarketValue(
+                        d.MarketValue
+                      )}<br>
                       <strong>Country:</strong> ${d.Country}
                   `
             );
 
+          // Handle click to navigate to player details page
           d3.select(this).on("click", function () {
             const playerDetails = {
               Name: d.Name,
@@ -148,23 +151,18 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Function to apply both filters and sorting
+    // Function to apply filters and sorting
     function applyFiltersAndSorting() {
-      const selectedCountry = countrySelect.empty()
-        ? "All"
-        : countrySelect.property("value");
-      const selectedFoot = footSelect.empty()
-        ? "All"
-        : footSelect.property("value");
-      const selectedPosition = positionSelect.empty()
-        ? "All"
-        : positionSelect.property("value");
+      const selectedCountry = countrySelect.property("value");
+      const selectedFoot = footSelect.property("value");
+      const selectedPosition = positionSelect.property("value");
 
       const sortByElement = d3.select("input[name='sort-option']:checked");
       const sortBy = sortByElement.empty()
         ? null
         : sortByElement.property("value");
 
+      // Apply filters based on country, foot, and position
       const filteredData = data.filter(
         (d) =>
           (selectedCountry === "All" || d.Country === selectedCountry) &&
@@ -172,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function () {
           (selectedPosition === "All" || d.Position === selectedPosition)
       );
 
-      let sizeScale = null; // Default size function
+      let sizeScale = null;
 
       if (sortBy) {
         const maxValue = d3.max(filteredData, (d) => +d[sortBy]);
@@ -180,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
         sizeScale = d3
           .scaleLinear()
           .domain([minValue, maxValue])
-          .range([30, 100]); // Adjust size range as needed
+          .range([30, 100]); // Adjust size range
       }
 
       createHeatmap(filteredData, (d) =>
@@ -191,7 +189,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initial heatmap render with all players at default size
     createHeatmap(data, null);
 
-    // Attach filters and sorting logic
+    // Attach filter and sorting logic to inputs
     countrySelect.on("change", applyFiltersAndSorting);
     footSelect.on("change", applyFiltersAndSorting);
     positionSelect.on("change", applyFiltersAndSorting);
@@ -204,7 +202,17 @@ document.addEventListener("DOMContentLoaded", function () {
       footSelect.property("value", "All");
       positionSelect.property("value", "All");
       d3.select("input[name='sort-option']:checked").property("checked", false);
-      createHeatmap(data, null); // Reset to default
+      createHeatmap(data, null); // Reset to default view
     });
   });
 });
+
+function formatMarketValue(value) {
+  if (value >= 1000000) {
+    return `€${(value / 1000000).toFixed(2).replace(/\.00$/, "")}M`;
+  } else if (value >= 1000) {
+    return `€${(value / 1000).toLocaleString()}K`;
+  } else {
+    return `€${value.toLocaleString()}`;
+  }
+}

@@ -9,8 +9,8 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
     margin.right;
   const height = 500 - margin.top - margin.bottom;
 
-  let xAttr = "Age"; // Default X-axis
-  let yAttr = "MarketValue"; // Default Y-axis
+  let xAttr = "Age"; // Default X-axis attribute
+  let yAttr = "MarketValue"; // Default Y-axis attribute
 
   // Set up scales for scatter plot
   const x = d3.scaleLinear().range([0, width]);
@@ -39,7 +39,7 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
 
   // Function to update the scatter plot based on selected attributes
   function updateScatterplot() {
-    // Update the axis labels in the title
+    // Update axis labels in the plot
     d3.select("#xAxisLabel").text(xAttr);
     d3.select("#yAxisLabel").text(yAttr);
 
@@ -77,7 +77,7 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
       .style("text-anchor", "end")
       .text(yAttr);
 
-    // Add scatter plot points to the main plot
+    // Add scatter plot points
     const dots = svg
       .selectAll(".dot")
       .data(data)
@@ -89,20 +89,20 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
       .attr("cy", (d) => y(d[yAttr]))
       .style("fill", (d) => color(d.Country))
       .style("opacity", 0.75)
-      .style("cursor", "pointer") // Ensure circles are interactive
+      .style("cursor", "pointer") // Interactive circles
       .on("mouseover", function (event, d) {
         showTooltip(event, d);
-        d3.select(this).attr("r", 7).style("opacity", 1);
+        d3.select(this).attr("r", 7).style("opacity", 1); // Highlight on hover
       })
-      .on("mouseout", function (event, d) {
+      .on("mouseout", function () {
         hideTooltip();
         d3.select(this).attr("r", 5).style("opacity", 0.75);
       })
       .on("click", function (event, d) {
-        goToPlayerDetails(d);
+        goToPlayerDetails(d); // Navigate to player details on click
       });
 
-    // Define the brush for the scatter plot
+    // Brush for zoom functionality
     const brush = d3
       .brush()
       .extent([
@@ -111,13 +111,14 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
       ])
       .on("brush end", brushed);
 
-    // Append the brush to the scatter plot
+    // Append brush to the scatter plot
     svg.append("g").attr("class", "brush").call(brush);
 
+    // Brush event to filter and highlight brushed area
     function brushed({ selection }) {
       if (!selection) return;
 
-      const [[x0, y0], [x1, y1]] = selection;
+      const [[x0, y0], [x1]] = selection;
 
       // Filter data based on brush selection
       const brushedData = data.filter(
@@ -125,18 +126,18 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
           x0 <= x(d[xAttr]) &&
           x(d[xAttr]) <= x1 &&
           y0 <= y(d[yAttr]) &&
-          y(d[yAttr]) <= y1
+          y(d[yAttr]) <= selection[1][1]
       );
 
       // Highlight selected dots
       dots.style("opacity", (d) => (brushedData.includes(d) ? 1 : 0.2));
 
-      // Update the zoomed scatter plot with brushed data
-      updateZoomedScatterplot(brushedData, x0, x1, y0, y1);
+      // Update zoomed scatter plot with brushed data
+      updateZoomedScatterplot(brushedData, x0, x1, y0, selection[1][1]);
     }
 
+    // Update zoomed scatter plot based on brushed area
     function updateZoomedScatterplot(brushedData, x0, x1, y0, y1) {
-      // Set new domains for the zoomed plot
       const xZoomed = d3
         .scaleLinear()
         .range([0, width])
@@ -145,11 +146,11 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
 
       const yZoomed = d3
         .scaleLinear()
-        .range([height, 0]) // Ensure yZoomed has the correct range (height to 0)
-        .domain([y.invert(y1), y.invert(y0)]) // Correct the domain to ensure the right orientation
+        .range([height, 0])
+        .domain([y.invert(y1), y.invert(y0)])
         .nice();
 
-      // Clear previous plot
+      // Clear previous zoomed plot
       svgZoomed.selectAll("*").remove();
 
       // Add x-axis to zoomed plot
@@ -179,7 +180,7 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
         .style("text-anchor", "end")
         .text(yAttr);
 
-      // Add scatter plot points to the zoomed plot
+      // Add scatter plot points to zoomed plot
       svgZoomed
         .selectAll(".dot")
         .data(brushedData)
@@ -196,7 +197,7 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
           showTooltip(event, d);
           d3.select(this).attr("r", 7).style("opacity", 1);
         })
-        .on("mouseout", function (event, d) {
+        .on("mouseout", function () {
           hideTooltip();
           d3.select(this).attr("r", 5).style("opacity", 0.75);
         })
@@ -206,10 +207,10 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
     }
   }
 
-  // Initial plot
+  // Initial scatter plot render
   updateScatterplot();
 
-  // Update the scatter plot when dropdown selections change
+  // Update scatter plot when dropdown selections change
   d3.select("#xAxisSelect").on("change", function () {
     xAttr = this.value;
     updateScatterplot();
@@ -220,29 +221,31 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
     updateScatterplot();
   });
 
+  // Show player tooltip on hover
   function showTooltip(event, d) {
     const tooltip = d3.select("#tooltip");
     tooltip.transition().duration(200).style("opacity", 0.9);
     tooltip
       .html(
         `
-            <strong>Name:</strong> ${d.Name}<br>
-            <strong>Country:</strong> ${d.Country}<br>
-            <strong>Age:</strong> ${d.Age}<br>
-            <strong>Market Value:</strong> €${d.MarketValue}<br>
-            <strong>Height:</strong> ${d.Height}<br>
-            <strong>Goals:</strong> ${d.Goals}
+          <strong>Name:</strong> ${d.Name}<br>
+          <strong>Country:</strong> ${d.Country}<br>
+          <strong>Age:</strong> ${d.Age}<br>
+          <strong>Market Value:</strong> ${formatMarketValue(d.MarketValue)}<br>
+          <strong>Height:</strong> ${d.Height}<br>
+          <strong>Goals:</strong> ${d.Goals}
         `
       )
       .style("left", event.pageX + 5 + "px")
-      .style("top", event.pageY - 28 + "px")
-      .style("z-index", 10);
+      .style("top", event.pageY - 28 + "px");
   }
 
+  // Hide tooltip when not hovering
   function hideTooltip() {
     d3.select("#tooltip").transition().duration(500).style("opacity", 0);
   }
 
+  // Navigate to player details page
   function goToPlayerDetails(d) {
     const playerDetails = {
       Name: d.Name,
@@ -263,7 +266,7 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
     )}`;
   }
 
-  // Create the legend
+  // Create legend based on unique countries
   const legend = d3.select("#legend");
   const uniqueCountries = Array.from(new Set(data.map((d) => d.Country)));
 
@@ -278,3 +281,14 @@ d3.csv("data/euro2024_players.csv").then(function (data) {
     legendItem.append("div").text(country);
   });
 });
+
+// Format market value for better readability
+function formatMarketValue(value) {
+  if (value >= 1000000) {
+    return `€${(value / 1000000).toFixed(2).replace(/\.00$/, "")}M`;
+  } else if (value >= 1000) {
+    return `€${(value / 1000).toLocaleString()}K`;
+  } else {
+    return `€${value.toLocaleString()}`;
+  }
+}
